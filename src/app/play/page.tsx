@@ -1945,11 +1945,12 @@ function PlayPageClient() {
   useEffect(() => {
     const fetchSourceDetail = async (
       source: string,
-      id: string
+      id: string,
+      title: string
     ): Promise<SearchResult[]> => {
       try {
         const detailResponse = await fetch(
-          `/api/detail?source=${source}&id=${id}`
+          `/api/source-detail?source=${source}&id=${id}&title=${encodeURIComponent(title)}`
         );
         if (!detailResponse.ok) {
           throw new Error('获取视频详情失败');
@@ -2059,7 +2060,7 @@ function PlayPageClient() {
       if (currentSource && currentId) {
         // 先快速获取当前源的详情
         try {
-          const currentSourceDetail = await fetchSourceDetail(currentSource, currentId);
+          const currentSourceDetail = await fetchSourceDetail(currentSource, currentId, searchTitle || videoTitle);
           if (currentSourceDetail.length > 0) {
             detailData = currentSourceDetail[0];
             sourcesInfo = currentSourceDetail;
@@ -2110,7 +2111,7 @@ function PlayPageClient() {
           // 如果是 openlist 源且 episodes 为空，需要调用 detail 接口获取完整信息
           if (detailData.source === 'openlist' && (!detailData.episodes || detailData.episodes.length === 0)) {
             console.log('[Play] OpenList source has no episodes, fetching detail...');
-            const detailSources = await fetchSourceDetail(currentSource, currentId);
+            const detailSources = await fetchSourceDetail(currentSource, currentId, searchTitle || videoTitle);
             if (detailSources.length > 0) {
               detailData = detailSources[0];
             }
@@ -2138,7 +2139,7 @@ function PlayPageClient() {
       // 如果是 openlist 源且 episodes 为空，需要调用 detail 接口获取完整信息
       if (detailData.source === 'openlist' && (!detailData.episodes || detailData.episodes.length === 0)) {
         console.log('[Play] OpenList source has no episodes after selection, fetching detail...');
-        const detailSources = await fetchSourceDetail(detailData.source, detailData.id);
+        const detailSources = await fetchSourceDetail(detailData.source, detailData.id, detailData.title || videoTitleRef.current);
         if (detailSources.length > 0) {
           detailData = detailSources[0];
         }
@@ -2331,7 +2332,7 @@ function PlayPageClient() {
       // 如果是 openlist 源且 episodes 为空，需要调用 detail 接口获取完整信息
       if (newDetail.source === 'openlist' && (!newDetail.episodes || newDetail.episodes.length === 0)) {
         try {
-          const detailResponse = await fetch(`/api/detail?source=${newSource}&id=${newId}`);
+          const detailResponse = await fetch(`/api/source-detail?source=${newSource}&id=${newId}&title=${encodeURIComponent(newTitle)}`);
           if (detailResponse.ok) {
             const detailData = await detailResponse.json();
             if (!detailData) {
