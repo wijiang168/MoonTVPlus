@@ -29,6 +29,7 @@
 - 🎭 **观影室**：支持多人同步观影、实时聊天、语音通话等功能（实验性）。
 - 📥 **M3U8完整下载**：通过合并m3u8片段实现完整视频下载。
 - 💾 **服务器离线下载**：支持在服务器端下载视频文件，支持断点续传，提前下载到家秒加载 。
+- 📚 **私人影库**：接入 OpenList，可打造专属私人影库，亦可观看网盘资源。
 
 ## ✨ 功能特性
 
@@ -260,6 +261,8 @@ dockge/komodo 等 docker compose UI 也有自动更新功能
 | NEXT_PUBLIC_ENABLE_OFFLINE_DOWNLOAD | 是否启用服务器离线下载功能（开启后也仅管理员和站长可用） | true/false | false |
 | OFFLINE_DOWNLOAD_DIR | 离线下载文件存储目录 | 任意有效路径 | /data |
 | VIDEOINFO_CACHE_MINUTES | 私人影库视频信息在内存中的缓存时长（分钟） | 正整数 | 1440（1天） |
+| NEXT_PUBLIC_ENABLE_SOURCE_SEARCH | 是否开启源站寻片功能 | true/false | true |
+| MAX_PLAY_RECORDS_PER_USER | 单个用户播放记录清理阈值（超过此数量将自动清理旧记录） | 正整数 | 100 |
 
 NEXT_PUBLIC_DOUBAN_PROXY_TYPE 选项解释：
 
