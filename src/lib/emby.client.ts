@@ -96,16 +96,6 @@ export class EmbyClient {
     this.authToken = config.AuthToken;
     this.username = config.Username;
     this.password = config.Password;
-
-    console.log('[EmbyClient] constructor - ServerURL:', this.serverUrl);
-    console.log('[EmbyClient] constructor - ApiKey:', this.apiKey);
-    console.log('[EmbyClient] constructor - UserId:', this.userId);
-    console.log('[EmbyClient] constructor - AuthToken:', this.authToken);
-    console.log('[EmbyClient] constructor - Advanced Options:', {
-      removeEmbyPrefix: this.removeEmbyPrefix,
-      appendMediaSourceId: this.appendMediaSourceId,
-      transcodeMp4: this.transcodeMp4,
-    });
   }
 
   private async ensureAuthenticated(): Promise<void> {
@@ -117,7 +107,6 @@ export class EmbyClient {
 
     // 如果有用户名和密码，自动认证
     if (this.username && this.password) {
-      console.log('[EmbyClient] Auto-authenticating with username/password');
       const authResult = await this.authenticate(this.username, this.password);
       this.authToken = authResult.AccessToken;
       this.userId = authResult.User.Id;
@@ -140,7 +129,6 @@ export class EmbyClient {
 
   async authenticate(username: string, password: string): Promise<{ AccessToken: string; User: { Id: string } }> {
     const url = `${this.serverUrl}/Users/AuthenticateByName`;
-    console.log('[EmbyClient] authenticate - URL:', url);
 
     const params = new URLSearchParams({
       Username: username,
@@ -158,7 +146,6 @@ export class EmbyClient {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[EmbyClient] authenticate - Error:', response.status, errorText);
       throw new Error(`Emby 认证失败 (${response.status}): ${errorText}`);
     }
 
@@ -172,25 +159,17 @@ export class EmbyClient {
     const url = `${this.serverUrl}/Users/Me`;
     const headers = this.getHeaders();
 
-    console.log('[EmbyClient] getCurrentUser - URL:', url);
-    console.log('[EmbyClient] getCurrentUser - Headers:', JSON.stringify(headers, null, 2));
-
     try {
       const response = await fetch(url, { headers });
 
-      console.log('[EmbyClient] getCurrentUser - Status:', response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[EmbyClient] getCurrentUser - Error Response:', errorText);
         throw new Error(`获取当前用户信息失败 (${response.status}): ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('[EmbyClient] getCurrentUser - Success:', data);
       return data;
     } catch (error) {
-      console.error('[EmbyClient] getCurrentUser - Exception:', error);
       throw error;
     }
   }
@@ -205,13 +184,10 @@ export class EmbyClient {
     const token = this.apiKey || this.authToken;
     const url = `${this.serverUrl}/Users/${this.userId}/Views${token ? `?api_key=${token}` : ''}`;
 
-    console.log('[EmbyClient] getUserViews - URL:', url);
-
     const response = await fetch(url);
 
     // 如果是 401 错误且有用户名密码，尝试重新认证
     if (response.status === 401 && this.username && this.password && !this.apiKey) {
-      console.log('[EmbyClient] Token expired, re-authenticating...');
       const authResult = await this.authenticate(this.username, this.password);
       this.authToken = authResult.AccessToken;
       this.userId = authResult.User.Id;
@@ -265,15 +241,10 @@ export class EmbyClient {
 
     const url = `${this.serverUrl}/Users/${this.userId}/Items?${searchParams.toString()}`;
 
-    console.log('[EmbyClient] getItems - URL:', url);
-    console.log('[EmbyClient] getItems - Token:', token);
-    console.log('[EmbyClient] getItems - UserId:', this.userId);
-
     const response = await fetch(url);
 
     // 如果是 401 错误且有用户名密码，尝试重新认证
     if (response.status === 401 && this.username && this.password && !this.apiKey) {
-      console.log('[EmbyClient] Token expired, re-authenticating...');
       const authResult = await this.authenticate(this.username, this.password);
       this.authToken = authResult.AccessToken;
       this.userId = authResult.User.Id;
@@ -312,7 +283,6 @@ export class EmbyClient {
 
     // 如果是 401 错误且有用户名密码，尝试重新认证
     if (response.status === 401 && this.username && this.password && !this.apiKey) {
-      console.log('[EmbyClient] Token expired, re-authenticating...');
       const authResult = await this.authenticate(this.username, this.password);
       this.authToken = authResult.AccessToken;
       this.userId = authResult.User.Id;
@@ -349,7 +319,6 @@ export class EmbyClient {
 
     // 如果是 401 错误且有用户名密码，尝试重新认证
     if (response.status === 401 && this.username && this.password && !this.apiKey) {
-      console.log('[EmbyClient] Token expired, re-authenticating...');
       const authResult = await this.authenticate(this.username, this.password);
       this.authToken = authResult.AccessToken;
       this.userId = authResult.User.Id;
@@ -401,7 +370,6 @@ export class EmbyClient {
 
     // 如果是 401 错误且有用户名密码，尝试重新认证
     if (response.status === 401 && this.username && this.password && !this.apiKey) {
-      console.log('[EmbyClient] Token expired, re-authenticating...');
       const authResult = await this.authenticate(this.username, this.password);
       this.authToken = authResult.AccessToken;
       this.userId = authResult.User.Id;
@@ -474,8 +442,6 @@ export class EmbyClient {
     const token = this.apiKey || this.authToken;
     const url = `${this.serverUrl}/Items/${itemId}/PlaybackInfo?UserId=${this.userId}${token ? `&api_key=${token}` : ''}`;
 
-    console.log('[EmbyClient] getPlaybackInfo - URL:', url);
-
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -490,18 +456,14 @@ export class EmbyClient {
       });
 
       if (!response.ok) {
-        console.error('[EmbyClient] getPlaybackInfo failed:', response.status);
         return {};
       }
 
       const data = await response.json();
       const mediaSourceId = data.MediaSources?.[0]?.Id;
 
-      console.log('[EmbyClient] getPlaybackInfo - MediaSourceId:', mediaSourceId);
-
       return { MediaSourceId: mediaSourceId };
     } catch (error) {
-      console.error('[EmbyClient] getPlaybackInfo error:', error);
       return {};
     }
   }
@@ -509,12 +471,6 @@ export class EmbyClient {
   async getStreamUrl(itemId: string, direct: boolean = true): Promise<string> {
     const token = this.apiKey || this.authToken;
     let url: string;
-
-    console.log('[EmbyClient] getStreamUrl - itemId:', itemId, 'direct:', direct);
-    console.log('[EmbyClient] getStreamUrl - Options:', {
-      appendMediaSourceId: this.appendMediaSourceId,
-      transcodeMp4: this.transcodeMp4,
-    });
 
     if (direct) {
       // 选项3: 转码mp4
@@ -526,17 +482,12 @@ export class EmbyClient {
 
       // 选项2: 拼接MediaSourceId参数
       if (this.appendMediaSourceId) {
-        console.log('[EmbyClient] getStreamUrl - Attempting to get MediaSourceId...');
         try {
           const playbackInfo = await this.getPlaybackInfo(itemId);
           if (playbackInfo.MediaSourceId) {
             url += `&MediaSourceId=${playbackInfo.MediaSourceId}`;
-            console.log('[EmbyClient] getStreamUrl - MediaSourceId appended:', playbackInfo.MediaSourceId);
-          } else {
-            console.log('[EmbyClient] getStreamUrl - No MediaSourceId returned from PlaybackInfo');
           }
         } catch (error) {
-          console.error('[EmbyClient] Failed to get MediaSourceId:', error);
           // 继续使用不带 MediaSourceId 的 URL
         }
       }
@@ -544,7 +495,6 @@ export class EmbyClient {
       url = `${this.serverUrl}/Videos/${itemId}/master.m3u8?api_key=${token}`;
     }
 
-    console.log('[EmbyClient] getStreamUrl - Final URL:', url);
     return url;
   }
 
