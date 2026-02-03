@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
       OpenListCacheUsername,
       OpenListCachePassword,
       OpenListCachePath,
+      OpenListCacheProxyEnabled,
     } = body as {
       TuneHubEnabled?: boolean;
       TuneHubBaseUrl?: string;
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
       OpenListCacheUsername?: string;
       OpenListCachePassword?: string;
       OpenListCachePath?: string;
+      OpenListCacheProxyEnabled?: boolean;
     };
 
     // 参数校验
@@ -57,7 +59,8 @@ export async function POST(request: NextRequest) {
       (OpenListCacheURL !== undefined && typeof OpenListCacheURL !== 'string') ||
       (OpenListCacheUsername !== undefined && typeof OpenListCacheUsername !== 'string') ||
       (OpenListCachePassword !== undefined && typeof OpenListCachePassword !== 'string') ||
-      (OpenListCachePath !== undefined && typeof OpenListCachePath !== 'string')
+      (OpenListCachePath !== undefined && typeof OpenListCachePath !== 'string') ||
+      (OpenListCacheProxyEnabled !== undefined && typeof OpenListCacheProxyEnabled !== 'boolean')
     ) {
       return NextResponse.json({ error: '参数格式错误' }, { status: 400 });
     }
@@ -82,6 +85,7 @@ export async function POST(request: NextRequest) {
       OpenListCacheUsername,
       OpenListCachePassword,
       OpenListCachePath,
+      OpenListCacheProxyEnabled,
     };
 
     // 写入数据库
